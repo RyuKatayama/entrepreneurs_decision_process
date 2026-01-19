@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>起業家の意思決定過程の情報幾何学的モデル</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #1a252f;
+            --phase1: #27ae60;
+            --phase2: #9b59b6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+            line-height: 1.8;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.6em;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        h3 {
+            color: var(--secondary);
+            font-size: 1.3em;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: var(--dark);
+            font-size: 1.1em;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .overview-box {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .phase-box {
+            border-left: 5px solid;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        .phase1 {
+            border-color: var(--phase1);
+            background: linear-gradient(90deg, rgba(39,174,96,0.1) 0%, white 100%);
+        }
+        
+        .phase2 {
+            border-color: var(--phase2);
+            background: linear-gradient(90deg, rgba(155,89,182,0.1) 0%, white 100%);
+        }
+        
+        .phase-title {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .phase1 .phase-title {
+            background: var(--phase1);
+        }
+        
+        .phase2 .phase-title {
+            background: var(--phase2);
+        }
+        
+        .formula-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .concept-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .concept-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: var(--light);
+            border-radius: 8px;
+            position: relative;
+            padding-left: 35px;
+        }
+        
+        .concept-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 15px;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e8f4f8;
+        }
+        
+        .diagram {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .diagram-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .flow-item {
+            background: white;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            padding: 15px 30px;
+            min-width: 250px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .flow-arrow {
+            font-size: 1.5em;
+            color: var(--secondary);
+        }
+        
+        .fractal-diagram {
+            font-family: monospace;
+            text-align: left;
+            background: var(--dark);
+            color: #2ecc71;
+            padding: 25px;
+            border-radius: 10px;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.6;
+        }
+        
+        .three-conditions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .condition-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-top: 4px solid;
+        }
+        
+        .condition-card:nth-child(1) {
+            border-color: #e74c3c;
+        }
+        
+        .condition-card:nth-child(2) {
+            border-color: #f39c12;
+        }
+        
+        .condition-card:nth-child(3) {
+            border-color: #3498db;
+        }
+        
+        .condition-card h4 {
+            margin-top: 0;
+        }
+        
+        .u-theory-diagram {
+            position: relative;
+            height: 300px;
+            margin: 30px 0;
+        }
+        
+        .u-shape {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .u-svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .integration-box {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--primary);
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.6em;
+            }
+            
+            section {
+                padding: 25px;
+            }
+            
+            h2 {
+                font-size: 1.3em;
+            }
+            
+            .three-conditions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>起業家の意思決定過程の<br>情報幾何学的モデル</h1>
+            <p>エフェクチュエーションとコーゼーションの統合的理解</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- 概要 -->
+        <section>
+            <h2>概要</h2>
+            <div class="overview-box">
+                <p>本モデルは、起業家の意思決定過程を<strong>エフェクチュエーション（目的創発）</strong>と<strong>コーゼーション（目的達成）</strong>の2フェーズに分け、<strong>自由エネルギー原理</strong>と<strong>情報幾何学</strong>の統合的視点からモデル化したものです。</p>
+            </div>
+            
+            <div class="diagram">
+                <div class="diagram-title">2フェーズモデルの全体像</div>
+                <div class="flow-container">
+                    <div class="flow-item" style="background: rgba(39,174,96,0.1); border-color: var(--phase1);">
+                        <strong>フェーズ1：目的を決める</strong><br>
+                        エフェクチュエーション局面
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item" style="background: #fff3cd; border-color: #ffc107;">
+                        <strong>遷移点：目的の結晶化</strong><br>
+                        3条件の積集合
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item" style="background: rgba(155,89,182,0.1); border-color: var(--phase2);">
+                        <strong>フェーズ2：目的を達成する</strong><br>
+                        コーゼーション局面
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- フェーズ1 -->
+        <section>
+            <h2>フェーズ1：目的を決める過程</h2>
+            <div class="phase-box phase1">
+                <span class="phase-title">エフェクチュエーション局面</span>
+                
+                <h4>特徴</h4>
+                <ul class="concept-list">
+                    <li><strong>高い不確実性</strong>：環境モデル自体が未確定</li>
+                    <li><strong>手段駆動</strong>：「何ができるか」から出発</li>
+                    <li><strong>目的の創発</strong>：行動と環境との相互作用を通じて目的が形成</li>
+                    <li><strong>許容損失原理</strong>：最悪ケースを制約として探索</li>
+                </ul>
+            </div>
+            
+            <h3>自由エネルギー原理による解釈</h3>
+            <p>エフェクチュエーション局面では、起業家は環境の生成モデル自体を探索・構築している段階にあります。</p>
+            
+            <div class="formula-box">
+                <p><strong>変数の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px;">
+                    <li>\(o\)：観測（市場からのフィードバック、顧客反応など）</li>
+                    <li>\(s\)：隠れ状態（市場構造、顧客ニーズなど）</li>
+                    <li>\(m\)：モデル構造（ビジネスモデルの仮説）</li>
+                </ul>
+            </div>
+            
+            <p>モデル \(m\) 自体が変動するため、<strong>拡張された自由エネルギー</strong>を考えます：</p>
+            
+            <div class="formula-box">
+                \[F_{eff} = \mathbb{E}_{q(m)}[F(m)] + D_{KL}[q(m) \| p(m)]\]
+                <p style="margin-top: 15px;"><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(F_{eff}\)：拡張自由エネルギー（目的関数、最小化対象）</li>
+                    <li>\(F(m)\)：モデル \(m\) の下での変分自由エネルギー</li>
+                    <li>\(q(m)\)：起業家が持つビジネスモデル仮説の確率分布（決定変数）</li>
+                    <li>\(p(m)\)：モデル空間上の事前分布</li>
+                    <li>\(\mathbb{E}_{q(m)}[\cdot]\)：\(q(m)\) に関する期待値</li>
+                    <li>\(D_{KL}[\cdot \| \cdot]\)：KLダイバージェンス（2つの分布間の距離尺度）</li>
+                </ul>
+            </div>
+            
+            <p>エフェクチュエーションでは、<strong>認識論的価値</strong>（情報獲得）が重視され、探索的行動が選好されます。</p>
+            
+            <h3>情報幾何学的表現</h3>
+            <p>ビジネスモデル仮説の空間 \(\mathcal{M}\) を<strong>統計多様体</strong>として捉えます。</p>
+            
+            <div class="formula-box">
+                <p><strong>統計多様体の定義：</strong></p>
+                \[\mathcal{M} = \{p_\theta(o, s) : \theta \in \Theta\}\]
+                <p style="margin-top: 15px;"><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(\mathcal{M}\)：ビジネスモデル仮説の空間（統計多様体）</li>
+                    <li>\(p_\theta(o, s)\)：パラメータ \(\theta\) で特徴づけられる同時確率分布</li>
+                    <li>\(\theta\)：モデルを特徴づけるパラメータベクトル</li>
+                    <li>\(\Theta\)：パラメータ空間</li>
+                    <li>\(o\)：観測変数、\(s\)：隠れ状態変数</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>エフェクチュエーションの幾何学的描像</h4>
+                <ul class="concept-list">
+                    <li>起業家は \(\mathcal{M}\) 上を<strong>探索的に移動</strong></li>
+                    <li>初期位置：手持ちの手段（who I am, what I know, whom I know）に対応</li>
+                    <li>曲率が高い領域：モデル選択に敏感、小さな変化で大きな予測変化</li>
+                    <li>\(m\)-接続的な動き（仮説の柔軟な混合・再構成）が支配的</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- 目的選択の規範 -->
+        <section>
+            <h2>目的選択の3条件</h2>
+            <p>実際の起業家は複合的な規範で意思決定しています。</p>
+            
+            <div class="three-conditions">
+                <div class="condition-card">
+                    <h4>条件1：許容損失</h4>
+                    <div class="formula-box">
+                        \[L(a, m) \leq L_{affordable}\]
+                        <p style="margin-top: 10px; font-size: 0.9em;">
+                            \(L(a, m)\)：行動 \(a\) とモデル \(m\) による損失<br>
+                            \(L_{affordable}\)：許容可能な損失の上限（制約条件）
+                        </p>
+                    </div>
+                    <p>「失っても良い範囲」なら試す。最適解より「納得解」を重視。</p>
+                </div>
+                
+                <div class="condition-card">
+                    <h4>条件2：魂の響き</h4>
+                    <div class="formula-box">
+                        \[V(m, \psi) \geq V_{threshold}\]
+                        <p style="margin-top: 10px; font-size: 0.9em;">
+                            \(V(m, \psi)\)：モデル \(m\) と魂の価値観 \(\psi\) の整合度<br>
+                            \(\psi\)：起業家の深層にある価値観・志（パラメータ）<br>
+                            \(V_{threshold}\)：価値整合性の閾値（制約条件）
+                        </p>
+                    </div>
+                    <p>「ワクワクするか」「腹落ちするか」という直感的な確信。</p>
+                </div>
+                
+                <div class="condition-card">
+                    <h4>条件3：コミットメント</h4>
+                    <div class="formula-box">
+                        \[C(m) \geq C_{threshold}\]
+                        <p style="margin-top: 10px; font-size: 0.9em;">
+                            \(C(m)\)：モデル \(m\) に対するコミットメント強度<br>
+                            \(C_{threshold}\)：コミットメントの閾値（制約条件）
+                        </p>
+                    </div>
+                    <p>他者との約束・関係性が生まれた時の社会的確定。</p>
+                </div>
+            </div>
+            
+            <h3>積集合と和集合</h3>
+            <table>
+                <tr>
+                    <th>規範</th>
+                    <th>条件</th>
+                    <th>適用場面</th>
+                </tr>
+                <tr>
+                    <td><strong>積集合（厳格）</strong></td>
+                    <td>3条件すべてを満たす</td>
+                    <td>余裕がある時、重大な決断</td>
+                </tr>
+                <tr>
+                    <td><strong>重み付け和</strong></td>
+                    <td>バランスを見て判断</td>
+                    <td>中程度の余裕、通常の決断</td>
+                </tr>
+                <tr>
+                    <td><strong>和集合（緩い）</strong></td>
+                    <td>いずれか1つを満たす</td>
+                    <td>余裕がない時、実験的行動</td>
+                </tr>
+            </table>
+            
+            <h3>起業家タイプとの対応</h3>
+            <table>
+                <tr>
+                    <th>タイプ</th>
+                    <th>優先規範</th>
+                    <th>特徴</th>
+                </tr>
+                <tr>
+                    <td>慎重型</td>
+                    <td>許容損失</td>
+                    <td>リスク管理重視</td>
+                </tr>
+                <tr>
+                    <td>情熱型</td>
+                    <td>魂の響き</td>
+                    <td>ビジョン駆動</td>
+                </tr>
+                <tr>
+                    <td>関係型</td>
+                    <td>コミットメント</td>
+                    <td>共創重視</td>
+                </tr>
+            </table>
+            
+            <h3>余裕と4層モデル</h3>
+            <p>深い層の余裕があるほど、厳格な選択規範を維持できます。</p>
+            <table>
+                <tr>
+                    <th>層</th>
+                    <th>余裕の源泉</th>
+                </tr>
+                <tr>
+                    <td>魂層</td>
+                    <td>存在論的安心</td>
+                </tr>
+                <tr>
+                    <td>精神・価値観層</td>
+                    <td>精神的余裕</td>
+                </tr>
+                <tr>
+                    <td>計画層</td>
+                    <td>時間的余裕</td>
+                </tr>
+                <tr>
+                    <td>身体・行動層</td>
+                    <td>経済的余裕</td>
+                </tr>
+            </table>
+        </section>
+        
+        <!-- フェーズ1のサブプロセス -->
+        <section>
+            <h2>フェーズ1のサブプロセス</h2>
+            
+            <div class="formula-box">
+                <p><strong>拡張自由エネルギー目的関数：</strong></p>
+                \[F_{total}(m) = F_{eff}(m) - \lambda_V V(m, \psi) - \lambda_C C(m)\]
+                <p style="margin-top: 15px;"><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(F_{total}(m)\)：総合目的関数（最小化対象）</li>
+                    <li>\(F_{eff}(m)\)：拡張自由エネルギー（予測誤差項）</li>
+                    <li>\(V(m, \psi)\)：価値整合性（最大化したい → 負号で最小化問題に変換）</li>
+                    <li>\(C(m)\)：コミットメント強度（最大化したい → 負号で最小化問題に変換）</li>
+                    <li>\(\lambda_V, \lambda_C\)：重み係数（各項の相対的重要度を調整）</li>
+                    <li>\(m\)：ビジネスモデル仮説（決定変数）</li>
+                    <li>\(\psi\)：魂の価値観（パラメータ）</li>
+                </ul>
+            </div>
+            
+            <div class="diagram">
+                <div class="diagram-title">フェーズ1のサブプロセス</div>
+                <div class="flow-container">
+                    <div class="flow-item">
+                        <strong>1-1：探索（発散）</strong><br>
+                        \(\mathcal{M}\)上を広く移動、曲率を感知<br>
+                        実行可能領域の発見
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item">
+                        <strong>1-2：評価（収束）</strong><br>
+                        候補点の\(F_{total}\)を比較<br>
+                        最良候補の特定
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item">
+                        <strong>1-3：確定（結晶化）</strong><br>
+                        \(q(m)\)の分散縮小<br>
+                        \(q(m) \approx \delta(m - m^*)\)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <p><strong>図中の記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(\mathcal{M}\)：ビジネスモデル仮説の空間（統計多様体）</li>
+                    <li>\(F_{total}\)：総合目的関数（予測誤差 − 価値整合性 − コミットメント）</li>
+                    <li>\(q(m)\)：ビジネスモデル仮説の確率分布（起業家の信念状態）</li>
+                    <li>\(m^*\)：選択・確定されたビジネスモデル</li>
+                    <li>\(\delta(m - m^*)\)：\(m^*\) に集中したデルタ分布（完全な確信状態）</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- フェーズ2 -->
+        <section>
+            <h2>フェーズ2：目的を達成する過程</h2>
+            <div class="phase-box phase2">
+                <span class="phase-title">コーゼーション局面</span>
+                
+                <h4>特徴</h4>
+                <ul class="concept-list">
+                    <li><strong>目的が確定</strong>：達成すべきゴールが明確</li>
+                    <li><strong>計画駆動</strong>：「どうすれば達成できるか」を逆算</li>
+                    <li><strong>予測と制御</strong>：環境モデルに基づく最適化</li>
+                    <li><strong>期待収益最大化</strong>：リスク・リターンの計算</li>
+                </ul>
+            </div>
+            
+            <h3>フェーズ1からの引き継ぎ</h3>
+            <ul class="concept-list">
+                <li>目的モデル \(m^*\)</li>
+                <li>目標状態 \(s^*\)</li>
+                <li>3条件の満足（許容損失、価値整合性、コミットメント）</li>
+            </ul>
+            
+            <h3>自由エネルギー原理による解釈</h3>
+            <div class="formula-box">
+                <p><strong>期待自由エネルギー（各時点）：</strong></p>
+                \[G(a_t) = D_{KL}[q(s_{t+1}|a_t) \| p(s^*)] + \mathbb{E}[F_{t+1}]\]
+                <p style="margin-top: 15px;"><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(G(a_t)\)：時点 \(t\) における期待自由エネルギー（目的関数）</li>
+                    <li>\(a_t\)：時点 \(t\) における行動（決定変数）</li>
+                    <li>\(q(s_{t+1}|a_t)\)：行動 \(a_t\) を取った時の次状態の予測分布</li>
+                    <li>\(p(s^*)\)：目標状態 \(s^*\) を中心とした目標分布</li>
+                    <li>\(s^*\)：達成したい目標状態（フェーズ1から引き継ぎ）</li>
+                    <li>\(D_{KL}[\cdot \| \cdot]\)：KLダイバージェンス（目標との乖離を測定）</li>
+                    <li>\(\mathbb{E}[F_{t+1}]\)：次時点の予測誤差の期待値</li>
+                </ul>
+                
+                <p style="margin-top: 20px;"><strong>累積目的関数：</strong></p>
+                \[J = \sum_{t=0}^{T} \gamma^t G(a_t)\]
+                <p style="margin-top: 15px;"><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(J\)：累積目的関数（全期間にわたる総コスト、最小化対象）</li>
+                    <li>\(T\)：計画期間の終端時点</li>
+                    <li>\(\gamma\)：割引率（\(0 < \gamma \leq 1\)、将来の価値をどれだけ割り引くか）</li>
+                    <li>\(\{a_t\}_{t=0}^{T}\)：行動列（決定変数の系列）</li>
+                </ul>
+            </div>
+            
+            <h3>情報幾何学的表現</h3>
+            <p>信念空間多様体 \(\mathcal{S}\) 上で、現在信念 \(q_0\) から目標分布 \(p^*\) への<strong>\(e\)-測地線</strong>に沿った移動として表現されます。</p>
+            
+            <div class="formula-box">
+                <p><strong>記号の定義：</strong></p>
+                <ul style="list-style: none; padding-left: 20px; margin-top: 10px;">
+                    <li>\(\mathcal{S} = \{q_\phi(s) : \phi \in \Phi\}\)：信念空間の統計多様体</li>
+                    <li>\(q_\phi(s)\)：パラメータ \(\phi\) で特徴づけられる状態 \(s\) の信念分布</li>
+                    <li>\(\Phi\)：パラメータ空間</li>
+                    <li>\(q_0\)：現在の信念分布（多様体上の出発点）</li>
+                    <li>\(p^* = \delta(s - s^*)\)：目標分布（多様体上の到達点）</li>
+                    <li>\(e\)-測地線：指数型分布族に沿った最短経路（データ駆動の自然な更新経路）</li>
+                </ul>
+            </div>
+            
+            <div class="diagram">
+                <div class="diagram-title">フェーズ2のサブプロセス</div>
+                <div class="flow-container">
+                    <div class="flow-item">
+                        <strong>2-1：計画（逆算）</strong><br>
+                        \(s^*\)からの逆向き経路設計
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item">
+                        <strong>2-2：実行（前進）</strong><br>
+                        \(e\)-投影による信念更新
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="flow-item">
+                        <strong>2-3：修正（適応）</strong><br>
+                        予測誤差への対応、測地線の再計算
+                    </div>
+                </div>
+            </div>
+            
+            <h3>フェーズ回帰条件</h3>
+            <p>以下の場合、フェーズ1に戻り目的を再探索します：</p>
+            <ul class="concept-list">
+                <li>予測誤差が継続的に大きい</li>
+                <li>制約条件を満たせなくなった</li>
+                <li>環境変化でモデル \(m^*\) が無効化</li>
+            </ul>
+        </section>
+        
+        <!-- U理論との対応 -->
+        <section>
+            <h2>U理論との対応</h2>
+            
+            <div class="diagram">
+                <div class="diagram-title">Uプロセスと本モデルの対応</div>
+                <svg viewBox="0 0 400 250" class="u-svg">
+                    <!-- U字曲線 -->
+                    <path d="M 50 50 Q 50 200 200 200 Q 350 200 350 50" 
+                          fill="none" stroke="#3498db" stroke-width="4"/>
+                    
+                    <!-- 左側ラベル -->
+                    <text x="30" y="40" font-size="12" fill="#27ae60">ダウンローディング</text>
+                    <text x="30" y="80" font-size="12" fill="#27ae60">↓</text>
+                    <text x="30" y="100" font-size="12" fill="#27ae60">センシング</text>
+                    <text x="80" y="140" font-size="11" fill="#666">フェーズ1</text>
+                    <text x="80" y="155" font-size="11" fill="#666">(発散)</text>
+                    
+                    <!-- 底部ラベル -->
+                    <text x="160" y="230" font-size="12" fill="#f39c12" font-weight="bold">プレゼンシング</text>
+                    <text x="155" y="245" font-size="10" fill="#666">目的の結晶化</text>
+                    
+                    <!-- 右側ラベル -->
+                    <text x="300" y="40" font-size="12" fill="#9b59b6">プロトタイピング</text>
+                    <text x="330" y="80" font-size="12" fill="#9b59b6">↑</text>
+                    <text x="300" y="100" font-size="12" fill="#9b59b6">クリスタライジング</text>
+                    <text x="270" y="140" font-size="11" fill="#666">フェーズ2</text>
+                    <text x="270" y="155" font-size="11" fill="#666">(実行)</text>
+                    
+                    <!-- 矢印 -->
+                    <circle cx="50" cy="50" r="5" fill="#27ae60"/>
+                    <circle cx="200" cy="200" r="8" fill="#f39c12"/>
+                    <circle cx="350" cy="50" r="5" fill="#9b59b6"/>
+                </svg>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Uプロセス</th>
+                    <th>本モデル</th>
+                    <th>内容</th>
+                </tr>
+                <tr>
+                    <td>U左側（手放す）</td>
+                    <td>フェーズ1前半（発散）</td>
+                    <td>既存前提を手放し、観察</td>
+                </tr>
+                <tr>
+                    <td>U底（プレゼンシング）</td>
+                    <td>目的の結晶化</td>
+                    <td>源泉との接触、3条件の積集合</td>
+                </tr>
+                <tr>
+                    <td>U右側（受け入れる）</td>
+                    <td>フェーズ2（計画・実行）</td>
+                    <td>ビジョンの具現化</td>
+                </tr>
+            </table>
+        </section>
+        
+        <!-- Uの3階層とフラクタル構造 -->
+        <section>
+            <h2>Uの3階層とフラクタル構造</h2>
+            
+            <table>
+                <tr>
+                    <th>階層</th>
+                    <th>深さ</th>
+                    <th>頻度</th>
+                    <th>時間スケール</th>
+                    <th>例</th>
+                </tr>
+                <tr>
+                    <td>ミクロU</td>
+                    <td>浅い</td>
+                    <td>多い</td>
+                    <td>日〜週</td>
+                    <td>日常の小さな決断</td>
+                </tr>
+                <tr>
+                    <td>メゾU</td>
+                    <td>中</td>
+                    <td>中程度</td>
+                    <td>月〜年</td>
+                    <td>プロジェクト方針</td>
+                </tr>
+                <tr>
+                    <td>マクロU</td>
+                    <td>深い</td>
+                    <td>稀</td>
+                    <td>数年</td>
+                    <td>人生・事業の根本方向</td>
+                </tr>
+            </table>
+            
+            <h3>フラクタル的入れ子構造</h3>
+            <div class="fractal-diagram">マクロU（深い）
+├─ フェーズ1：人生・事業の目的探索
+│   └─ メゾU（中）が複数回
+│       ├─ フェーズ1：戦略目的の探索
+│       │   └─ ミクロU（浅い）が多数
+│       └─ フェーズ2：戦略の実行
+└─ フェーズ2：人生目的の実現
+    └─ メゾU（中）が複数回
+        └─ ...（再帰的）</div>
+            
+            <h3>各階層でのフェーズ特性</h3>
+            <table>
+                <tr>
+                    <th>階層</th>
+                    <th>フェーズ1</th>
+                    <th>フェーズ2</th>
+                    <th>選択規範</th>
+                </tr>
+                <tr>
+                    <td>ミクロ</td>
+                    <td>今日何をするか</td>
+                    <td>タスク実行</td>
+                    <td>和集合（軽く試す）</td>
+                </tr>
+                <tr>
+                    <td>メゾ</td>
+                    <td>戦略・方針決定</td>
+                    <td>プロジェクト推進</td>
+                    <td>重み付け和</td>
+                </tr>
+                <tr>
+                    <td>マクロ</td>
+                    <td>志・ビジョン創発</td>
+                    <td>事業・人生の具現化</td>
+                    <td>積集合（厳格）</td>
+                </tr>
+            </table>
+            
+            <h3>4層モデルとの対応</h3>
+            <table>
+                <tr>
+                    <th>Uの深さ</th>
+                    <th>到達する層</th>
+                </tr>
+                <tr>
+                    <td>ミクロU</td>
+                    <td>計画・行動層</td>
+                </tr>
+                <tr>
+                    <td>メゾU</td>
+                    <td>精神・価値観層</td>
+                </tr>
+                <tr>
+                    <td>マクロU</td>
+                    <td>魂層</td>
+                </tr>
+            </table>
+        </section>
+        
+        <!-- ホロニカルアプローチと華厳四法界 -->
+        <section>
+            <h2>ホロニカルアプローチと華厳四法界</h2>
+            
+            <h3>ホロニカルアプローチの核心</h3>
+            <ul class="concept-list">
+                <li>「今ここ」に全体が内包</li>
+                <li>部分が全体を映し出す</li>
+                <li>フラクタル的自己相似性</li>
+                <li>主客未分の体験</li>
+            </ul>
+            
+            <h3>華厳四法界との対応</h3>
+            <div class="highlight-box">
+                <p><strong>重々無尽縁起</strong>：すべてが相互に映し合う（インドラの網）</p>
+                <p><strong>事事無碍法界</strong>：事象と事象が妨げなく相互浸透</p>
+                <p><strong>一即多、多即一</strong>：ミクロUの一決断に、マクロUの全体が含まれる</p>
+            </div>
+            
+            <h3>起業家の「今ここ」の決断に含まれるもの</h3>
+            <div class="fractal-diagram">一つのミクロU
+    ├─ 魂の響き（マクロUからの反映）
+    ├─ 価値観（メゾUからの反映）
+    ├─ 過去の経験（時間軸の凝縮）
+    ├─ 関係性（他者の存在の内包）
+    └─ 未来の可能性（まだ見ぬものの先取り）</div>
+            
+            <h3>情報幾何学的な解釈</h3>
+            <div class="integration-box">
+                <p><strong>ホログラフィック原理との類似</strong></p>
+                <ul class="concept-list">
+                    <li>多様体上の一点に、全体の構造情報が埋め込まれている</li>
+                    <li>フィッシャー情報行列：局所的な計量に全体の曲率構造が反映</li>
+                    <li>フラクタル多様体：各スケールで同じ構造が再現</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- まとめ -->
+        <section>
+            <h2>まとめと統合の意義</h2>
+            
+            <h3>本モデルの特徴</h3>
+            <ol style="padding-left: 20px;">
+                <li>エフェクチュエーションとコーゼーションを統一的枠組みで記述</li>
+                <li>自由エネルギー原理による意思決定の動機づけ</li>
+                <li>情報幾何学による構造的・視覚的理解</li>
+                <li>3条件（許容損失・価値整合性・コミットメント）による選択規範</li>
+                <li>U理論との対応とフラクタル的階層構造</li>
+                <li>ホロニカルアプローチ・華厳四法界との接続</li>
+            </ol>
+            
+            <h3>統合の意義：三つの架橋</h3>
+            <div class="three-conditions">
+                <div class="condition-card">
+                    <h4>東洋と西洋</h4>
+                    <p>華厳・唯識とハイデガー哲学の架橋</p>
+                </div>
+                <div class="condition-card">
+                    <h4>心理学と数理科学</h4>
+                    <p>ホロニカルアプローチと情報幾何学の架橋</p>
+                </div>
+                <div class="condition-card">
+                    <h4>実践知と理論知</h4>
+                    <p>起業家行動と学術理論の架橋</p>
+                </div>
+            </div>
+            
+            <h3>今後の検討課題</h3>
+            <ul class="concept-list">
+                <li>4層モデル（魂・精神・計画・身体）とのさらなる統合</li>
+                <li>発散・収束・結晶化・実践サイクルとの詳細な対応関係</li>
+                <li>具体的な起業家事例への適用</li>
+                <li>数値シミュレーションによる検証</li>
+                <li>人間-AI協調における応用</li>
+                <li>ホロニカルアプローチの数理的定式化</li>
+            </ul>
+        </section>
+    </div>
+    
+    <footer>
+        <p>本文書は片山立氏との壁打ちセッションに基づく</p>
+    </footer>
+</body>
+</html>
